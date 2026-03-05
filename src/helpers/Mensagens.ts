@@ -4,6 +4,11 @@ export default class Mensagens {
     }
 
     public resultado(valor: number): string {
+
+        if (valor === 67){
+            return "SIXX SEVEN\n"; // ⁶🤷⁷
+        }
+
         return `O resultado da operação é: ${valor}\n`;
     }
 
