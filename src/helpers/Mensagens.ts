@@ -10,4 +10,8 @@ export default class Mensagens {
     public erro(): string {
         return "Operação inválida!";
     }
+
+    public raizes(raizes : number[]): string {
+        return `As raízes da equação são: ${raizes[0]} e ${raizes[1]}\n`;
+    }
 }

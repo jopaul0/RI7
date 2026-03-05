@@ -6,6 +6,7 @@ import Multiplicacao from './core/Multiplicacao';
 import Divisao from './core/Divisao';
 import Potenciacao from './core/Potenciacao';
 import Radiacao from './core/Radiciacao';
+import Bhaskara from './core/Bhaskara';
 
 const msgs = new Mensagens();
 const leitor = readline.createInterface({
@@ -14,53 +15,72 @@ const leitor = readline.createInterface({
 });
 
 const iniciar = () => {
-    leitor.question(msgs.instrucao(), (valor : any) => {
-        if (valor === 'Sair') {
+    leitor.question("Qual operação deseja realizar? (Somar, Subtrair, Multiplicar, Dividir, Potenciar, Radiciar, Bhaskara, Sair): ", (op) => {
+        const operacao = op.trim();
+        let calculo;
+
+        if (operacao === 'Sair') {
             leitor.close();
             return;
         }
 
+        if (operacao === 'Bhaskara') {
+            // Fluxo para 3 números
+            leitor.question("Digite o valor de A: ", (a) => {
+                leitor.question("Digite o valor de B: ", (b) => {
+                    leitor.question("Digite o valor de C: ", (c) => {
+                        let calculo = new Bhaskara();
+                        const n1 = Number(a);
+                        const n2 = Number(b);
+                        const n3 = Number(c);
+                        if (calculo) {
+                            console.log(msgs.raizes(calculo.calcular(n1, n2, n3)));
+                        }
+                        iniciar();
+                    });
+                });
+            });
+        } else {
+            // Fluxo padrão para 2 números
+            leitor.question("Digite o primeiro número: ", (num1) => {
+                leitor.question("Digite o segundo número: ", (num2) => {
+                    const n1 = Number(num1);
+                    const n2 = Number(num2);
 
-        const instrucoes = valor.split(' '); // Ex: "10 5 Somar"
-        const n1 = Number(instrucoes[0]);
-        const n2 = Number(instrucoes[1]);
-        const operacao = instrucoes[2];
 
-        let calculo;
+                    switch (operacao) {
+                        case 'Somar':
+                            calculo = new Soma();
+                            break;
+                        case 'Subtrair':
+                            calculo = new Subtracao();
+                            break;
+                        case 'Multiplicar':
+                            calculo = new Multiplicacao();
+                            break;
+                        case 'Dividir':
+                            calculo = new Divisao();
+                            break;
+                        case 'Potenciar':
+                            calculo = new Potenciacao();
+                            break;
+                        case 'Radiciar':
+                            calculo = new Radiacao();
+                            break;
+                        default:
+                            console.log(msgs.erro());
+                            iniciar();
+                            return;
+                    }
 
-        switch (operacao) {
-            case 'Somar':
-                calculo = new Soma();
-                console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                break;
-            case 'Subtrair':
-                calculo = new Subtracao();
-                console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                break;
-            case 'Multiplicar':
-                calculo = new Multiplicacao();
-                console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                break;
-            case 'Dividir':
-                calculo = new Divisao();
-                console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                break;
-            case 'Potenciar':
-                calculo = new Potenciacao();
-                console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                break;
-            case 'Radiciar':
-                calculo = new Radiacao();
-                console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                break;
-            case 'Sair':
-                leitor.close();
-                return;
-            default:
-                console.log(msgs.erro());
+                    if (calculo) {
+                        console.log(msgs.resultado(calculo.calcular(n1, n2)));
+                    }
+                    iniciar();
+                });
+            });
         }
-
-        iniciar();
+        
     });
 };
 
