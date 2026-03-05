@@ -7,6 +7,7 @@ import Divisao from './core/Divisao';
 import Potenciacao from './core/Potenciacao';
 import Radiacao from './core/Radiciacao';
 import Bhaskara from './core/Bhaskara';
+import Operacao from './core/Operacao';
 
 const msgs = new Mensagens();
 const leitor = readline.createInterface({
@@ -14,74 +15,56 @@ const leitor = readline.createInterface({
     output: process.stdout
 });
 
-const iniciar = () => {
-    leitor.question("Qual operação deseja realizar? (Somar, Subtrair, Multiplicar, Dividir, Potenciar, Radiciar, Bhaskara, Sair): ", (op) => {
-        const operacao = op.trim();
-        let calculo;
+const obterOperacao = (tipo: string): Operacao | null => {
+    const operacoes: { [key: string]: new () => Operacao } = {
+        'Somar': Soma,
+        'Subtrair': Subtracao,
+        'Multiplicar': Multiplicacao,
+        'Dividir': Divisao,
+        'Potenciar': Potenciacao,
+        'Radiciar': Radiacao,
+        'Bhaskara': Bhaskara
+    };
 
-        if (operacao === 'Sair') {
+    const Classe = operacoes[tipo];
+    return Classe ? new Classe() : null;
+};
+
+const pergunta = (query: string): Promise<string> =>
+    new Promise((resolve) => leitor.question(query, resolve));
+
+const iniciar = async () => {
+    while (true) {
+        const op = (await pergunta("\nQual operação deseja realizar? (Somar, Subtrair, Multiplicar, Dividir, Potenciar, Radiciar, Bhaskara, Sair): ")).trim();
+
+        if (op === 'Sair') {
             leitor.close();
-            return;
+            break;
         }
 
-        if (operacao === 'Bhaskara') {
-            // Fluxo para 3 números
-            leitor.question("Digite o valor de A: ", (a) => {
-                leitor.question("Digite o valor de B: ", (b) => {
-                    leitor.question("Digite o valor de C: ", (c) => {
-                        let calculo = new Bhaskara();
-                        const n1 = Number(a);
-                        const n2 = Number(b);
-                        const n3 = Number(c);
-                        if (calculo) {
-                            console.log(msgs.raizes(calculo.calcular(n1, n2, n3)));
-                        }
-                        iniciar();
-                    });
-                });
-            });
-        } else {
-            // Fluxo padrão para 2 números
-            leitor.question("Digite o primeiro número: ", (num1) => {
-                leitor.question("Digite o segundo número: ", (num2) => {
-                    const n1 = Number(num1);
-                    const n2 = Number(num2);
-
-
-                    switch (operacao) {
-                        case 'Somar':
-                            calculo = new Soma();
-                            break;
-                        case 'Subtrair':
-                            calculo = new Subtracao();
-                            break;
-                        case 'Multiplicar':
-                            calculo = new Multiplicacao();
-                            break;
-                        case 'Dividir':
-                            calculo = new Divisao();
-                            break;
-                        case 'Potenciar':
-                            calculo = new Potenciacao();
-                            break;
-                        case 'Radiciar':
-                            calculo = new Radiacao();
-                            break;
-                        default:
-                            console.log(msgs.erro());
-                            iniciar();
-                            return;
-                    }
-
-                    if (calculo) {
-                        console.log(msgs.resultado(calculo.calcular(n1, n2)));
-                    }
-                    iniciar();
-                });
-            });
+        const calculo = obterOperacao(op);
+        if (!calculo) {
+            console.log(msgs.erro());
+            continue;
         }
-        
-    });
+
+        try {
+            if (op === 'Bhaskara') {
+                const a = Number(await pergunta("Digite A: "));
+                const b = Number(await pergunta("Digite B: "));
+                const c = Number(await pergunta("Digite C: "));
+
+                console.log(msgs.raizes(calculo.calcular(a, b, c) as number[]));
+            } else {
+                const n1 = Number(await pergunta("Digite o primeiro número: "));
+                const n2 = Number(await pergunta("Digite o segundo número: "));
+
+                console.log(msgs.resultado(calculo.calcular(n1, n2, 0) as number));
+            }
+        } catch (e: any) {
+            console.log(`Erro: ${e.message}`);
+        }
+    }
 };
 
 iniciar();
